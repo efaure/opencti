@@ -3,22 +3,21 @@ on:
   workflow_dispatch:
 
 jobs:
-  Hello-World:
+  Runner-informtion:
     # You need to use the INSTALLATION_NAME from the previous step
     runs-on: arc-runner-set-dev
     steps:
+    - name: "Hello world"
     - run: echo "This job uses runner scale set runners!"
 
-    steps:
-      - name: Display Runner Information
-        run: |
+    - name: Display Runner Information
+      run: |
           echo "Runner OS: $RUNNER_OS"
           echo "Runner Arch: $RUNNER_ARCH"
           echo "Runner Name: $RUNNER_NAME"
 
-    steps:
-      - name: Display GitHub Context
-        run: |
+    - name: Display GitHub Context
+      run: |
           echo "Workflow: ${{ github.workflow }}"
           echo "Run ID: ${{ github.run_id }}"
           echo "Run Number: ${{ github.run_number }}"
