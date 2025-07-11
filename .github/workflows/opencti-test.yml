@@ -8,7 +8,7 @@ jobs:
     runs-on: arc-runner-set-dev
     steps:
     - name: "Hello world"
-    - run: echo "This job uses runner scale set runners!"
+      run: echo "This job uses runner scale set runners!"
 
     - name: Display Runner Information
       run: |
