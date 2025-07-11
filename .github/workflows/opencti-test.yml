@@ -1,9 +1,10 @@
 name: OpenCTI CI
 on:
   workflow_dispatch:
+  push:
 
 jobs:
-  OpenCTI CI:
+  OpenCTI-CI:
     # You need to use the INSTALLATION_NAME from the previous step
     runs-on: arc-runner-set-dev
     steps:
