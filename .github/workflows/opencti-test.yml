@@ -1,8 +1,8 @@
 name: OpenCTI CI
 on:
   workflow_dispatch:
-  push:
-  pull_request:
+#  push:
+    pull_request:
 
 jobs:
   OpenCTI-CI:
@@ -39,10 +39,10 @@ jobs:
       with:
         entrypoint: /bin/sh
         args: -c 'echo "hello world" ; 
-          echo "Launching clonde-dependencies.sh ${github.ref}" "${github.head_ref}" "$(pwd)" "${{ github.event.pull_request.title }}" ; 
           cp -R opencti-platform platform-reference ; 
           apk add git github-cli ; 
-          chmod 777 scripts/* '
+          chmod 777 scripts/*          
+          echo "Launching clonde-dependencies.sh ${{ github.ref }} ${{ github.head_ref }} $(pwd) ${{ github.event.pull_request.title }}" ; '
     services:
       redis:
         image: redis:8.0.0
