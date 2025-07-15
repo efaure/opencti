@@ -20,7 +20,7 @@ jobs:
       uses: docker://alpine:3.8
       with:
           entrypoint: /bin/sh
-          args: echo "I'm in alpine test"
+          args: -c echo "I'm in alpine test"
 
     - name: dependencies-checkout
 #      uses: addnab/docker-run-action@v3
