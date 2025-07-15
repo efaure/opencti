@@ -20,6 +20,8 @@ jobs:
       uses: actions/checkout@v4
     - name: dependencies-checkout
       uses: docker://nikolaik/python-nodejs:python3.11-nodejs22-alpine
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         entrypoint: /bin/sh
         args: -c 'set -x ;
