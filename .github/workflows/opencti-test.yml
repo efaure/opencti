@@ -28,7 +28,7 @@ jobs:
           apk add git github-cli ; 
           chmod 777 scripts/* ;         
           echo "Launching clonde-dependencies.sh ${{ github.ref }} ${{ github.head_ref }} $(pwd) ${{ github.event.pull_request.number }}" ; 
-          ./scripts/clone-dependencies.sh "${GITHUB_HEAD_REF}" "${GITHUB_BASE_REF}" "$(pwd)" "${{ github.event.pull_request.title }}" ;
+          ./scripts/clone-dependencies.sh "${GITHUB_HEAD_REF}" "${GITHUB_BASE_REF}" "$(pwd)" "${{ github.event.pull_request.number }}" ;
           ls -lart ;
           cd client-python ;
           echo "[INFO] using client-python on branch $(git branch --show-current)" ;
