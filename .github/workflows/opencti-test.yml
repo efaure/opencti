@@ -39,9 +39,9 @@ jobs:
       with:
         entrypoint: /bin/sh
         args: -c 'echo "hello world" ; 
+          echo "Launching clonde-dependencies.sh ${github.ref}" "${github.head_ref}" "$(pwd)" "${{ github.event.pull_request.title }}" ; 
           cp -R opencti-platform platform-reference ; 
           apk add git github-cli ; 
-          echo "Launching clonde-dependencies.sh ${github.ref}" "${github.head_ref}" "$(pwd)" "${{ github.event.pull_request.title }}"; 
           chmod 777 scripts/* '
     services:
       redis:
