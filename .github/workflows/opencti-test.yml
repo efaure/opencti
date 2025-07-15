@@ -15,13 +15,6 @@ jobs:
           echo "Runner OS: $RUNNER_OS \t Runner Arch: $RUNNER_ARCH"
           echo "Workflow: ${{ github.workflow }} \t Run ID: ${{ github.run_id }} \t Run Number: ${{ github.run_number }}"
 
-
-    - name: Alpine test
-      uses: docker://alpine:3.8
-      with:
-          entrypoint: /bin/sh
-          args: -c echo "I'm in alpine test"
-
     - name: dependencies-checkout
 #      uses: addnab/docker-run-action@v3
 #      with:
@@ -42,8 +35,11 @@ jobs:
 #        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         entrypoint: /bin/sh
-        args: -c "echo 'hello world'"
-
+        args: -c 'echo "hello world; "
+          cp -R opencti-platform platform-reference; 
+          apk add git github-cli; 
+          chmod 777 scripts/*; 
+          echo "Launching clonde-dependencies.sh ${GITHUB_HEAD_REF}" "${GITHUB_BASE_REF}" "$(pwd)" "${{ github.event.pull_request.title }}" '
     services:
       redis:
         image: redis:8.0.0
