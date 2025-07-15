@@ -16,6 +16,8 @@ jobs:
           echo "Runner OS: $RUNNER_OS \t Runner Arch: $RUNNER_ARCH"
           echo "Workflow: ${{ github.workflow }} \t Run ID: ${{ github.run_id }} \t Run Number: ${{ github.run_number }}"
 
+    - name: OpenCTI checkout
+      uses: actions/checkout@v4
     - name: dependencies-checkout
 #      uses: addnab/docker-run-action@v3
 #      with:
