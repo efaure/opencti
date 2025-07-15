@@ -19,6 +19,7 @@ echo "CONNECTOR_DIR=${CONNECTOR_DIR}"
 
 clone_for_pr_build() {
     cd ${WORKSPACE}
+    echo ${GITHUB_TOKEN}
     export GH_TOKEN="${GITHUB_TOKEN}"
 
     gh auth login --hostname github.com --with-token ${GH_TOKEN}
@@ -111,6 +112,7 @@ clone_for_push_build() {
     git clone -b $CONNECTOR_BRANCH https://github.com/OpenCTI-Platform/connectors.git ${CONNECTOR_DIR}
 }
 
+set -x;
 echo "[CLONE-DEPS] START; with PR_BRANCH_NAME=${PR_BRANCH_NAME},PR_TARGET_BRANCH=${PR_TARGET_BRANCH}, PR_NUMBER=${PR_NUMBER}, OPENCTI_DIR=${OPENCTI_DIR}."
 if [[ -z ${PR_NUMBER} ]] || [[ ${PR_NUMBER} == "" ]]
 then
@@ -130,7 +132,7 @@ then
 else
     # PR build is trigger from Pull Request coming both from branch and forks.
     # We need to have this clone accross repository that works for forks (community PR)
-    echo "[CLONE-DEPS] Got PR number ${PR_NUMBER} from Drone = "PR build"; Pull Request coming both from branch and forks."
+    echo "[CLONE-DEPS] Got PR number ${PR_NUMBER} from GitHub action; Pull Request coming both from branch and forks."
     clone_for_pr_build
 fi
 
