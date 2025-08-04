@@ -22,11 +22,11 @@ jobs:
           ls  ${GITHUB_WORKSPACE} -larth  2>/dev/null || true
           ls /__w  -larth 2>/dev/null || true
 
-    - uses: actions-hub/kubectl@master
-      env:
-        KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
-      with:
-        args: get pods
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v3
+
+    - name: Kubernetes command
+      run: kubectl get pod
 
     - name: OpenCTI checkout
       uses: actions/checkout@v4
