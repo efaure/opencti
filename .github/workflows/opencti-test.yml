@@ -21,6 +21,8 @@ jobs:
           ls -larth
           ls  ${GITHUB_WORKSPACE} -larth  2>/dev/null || true
           ls /__w  -larth 2>/dev/null || true
+          echo "try kubectl"
+          kubectl get ns
 
     - name: OpenCTI checkout
       uses: actions/checkout@v4
