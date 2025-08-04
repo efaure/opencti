@@ -32,7 +32,7 @@ jobs:
       with:
         entrypoint: /bin/sh
         args: -c 'set -x ;
-          echo "dependencies-checkout" ; 
+          echo "$(date) dependencies-checkout" ; 
           echo "Workspace GITHUB_WORKSPACE =  ${GITHUB_WORKSPACE}" ;
           ls  ${GITHUB_WORKSPACE} -larth  2>/dev/null || true ;
           cp -R opencti-platform platform-reference ; 
@@ -74,6 +74,7 @@ jobs:
       with:
         entrypoint: /bin/sh
         args: -c 'set -x ;
+          echo "$(date) raw start" ; 
           sleep 10;
           ls -lart;
           apk add build-base git libffi-dev cargo;
@@ -85,6 +86,7 @@ jobs:
           cd /tmp/raw-start-platform/opencti-graphql;
           yarn install;
           yarn install:python;
+          sleep 300;
           NODE_OPTIONS=--max_old_space_size=8192 yarn start;'
 
 
