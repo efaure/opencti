@@ -30,6 +30,7 @@ jobs:
         args: -c 'set -x ;
           echo "dependencies-checkout" ; 
           echo "Workspace  ${GITHUB_WORKSPACE}"    ${{ github.workspace }} ;
+          sleep 60;
           ls ${{ github.workspace }} ;
           cp -R opencti-platform platform-reference ; 
           apk add git github-cli ; 
