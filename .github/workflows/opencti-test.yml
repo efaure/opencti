@@ -16,8 +16,9 @@ jobs:
           echo "Runner OS: $RUNNER_OS \t Runner Arch: $RUNNER_ARCH"
           echo "Workflow: ${{ github.workflow }} \t Run ID: ${{ github.run_id }} \t Run Number: ${{ github.run_number }}"
           echo "Workspace: ${{ github.workspace }}"
-          sleep 60;
-          ls ${{ github.workspace }} 
+          pwd;
+          ls ${{ github.workspace }}  2>/dev/null || true
+          ls /__w  2>/dev/null || true
 
     - name: OpenCTI checkout
       uses: actions/checkout@v4
@@ -31,8 +32,10 @@ jobs:
         args: -c 'set -x ;
           echo "dependencies-checkout" ; 
           echo "Workspace  ${GITHUB_WORKSPACE}"    ${{ github.workspace }} ;
+          echo "pwd $(pwd)"
+          ls ${{ github.workspace }}  2>/dev/null || true ;
+          ls /__w  2>/dev/null || true ; 
           sleep 60;
-          ls ${{ github.workspace }} ;
           cp -R opencti-platform platform-reference ; 
           apk add git github-cli ; 
           chmod 777 scripts/* ;         
