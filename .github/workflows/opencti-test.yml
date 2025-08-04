@@ -42,7 +42,6 @@ jobs:
           ./scripts/clone-dependencies.sh "${GITHUB_HEAD_REF}" "${GITHUB_BASE_REF}" "$(pwd)" "${{ github.event.pull_request.number }}" ;
           ls -lart ;
           cd client-python ;
-          sleep 60 ;
           echo "[INFO] using client-python on branch $(git branch --show-current)" ;
           git log -n 1 ;'
 
@@ -86,7 +85,6 @@ jobs:
           cd /tmp/raw-start-platform/opencti-graphql;
           yarn install;
           yarn install:python;
-          sleep 300;
           NODE_OPTIONS=--max_old_space_size=8192 yarn start;'
 
 
