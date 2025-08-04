@@ -85,7 +85,8 @@ jobs:
           cd /tmp/raw-start-platform/opencti-graphql;
           yarn install;
           yarn install:python;
-          NODE_OPTIONS=--max_old_space_size=8192 yarn start;'
+          NODE_OPTIONS=--max_old_space_size=8192 yarn start && true ;
+          sleep 300'
 
 
     - name: Echo after opencti start
@@ -104,7 +105,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-      elasticsearch:
+      elastic:
         image: docker.elastic.co/elasticsearch/elasticsearch:8.18.2
         ports:
           - 9200:9200
