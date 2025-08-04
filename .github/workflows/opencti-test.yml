@@ -15,9 +15,12 @@ jobs:
           echo "Runner Name: $RUNNER_NAME"
           echo "Runner OS: $RUNNER_OS \t Runner Arch: $RUNNER_ARCH"
           echo "Workflow: ${{ github.workflow }} \t Run ID: ${{ github.run_id }} \t Run Number: ${{ github.run_number }}"
+          echo "Workspace: ${{ github.workspace }}"
+          ls ${{ github.workspace }} 
 
     - name: OpenCTI checkout
       uses: actions/checkout@v4
+
     - name: dependencies-checkout
       uses: docker://nikolaik/python-nodejs:python3.11-nodejs22-alpine
       env:
@@ -26,6 +29,8 @@ jobs:
         entrypoint: /bin/sh
         args: -c 'set -x ;
           echo "dependencies-checkout" ; 
+          echo "Workspace  ${GITHUB_WORKSPACE}"    ${{ github.workspace }} ;
+          ls ${{ github.workspace }} ;
           cp -R opencti-platform platform-reference ; 
           apk add git github-cli ; 
           chmod 777 scripts/* ;         
@@ -35,6 +40,46 @@ jobs:
           cd client-python ;
           echo "[INFO] using client-python on branch $(git branch --show-current)" ;
           git log -n 1 ;'
+
+
+
+
+    - name: OpenCTI Raw start
+      uses: docker://nikolaik/python-nodejs:python3.11-nodejs22-alpine
+      env:
+        APP__PORT: 4100
+        APP__ADMIN__PASSWORD: admin
+        APP__ENABLED_DEV_FEATURES: '["*"]'
+        APP__CHILD_LOCKING_PROCESS__ENABLED: true
+#          APP__ENTERPRISE_EDITION_LICENSE:
+#            from_secret: ee_license
+        APP__ADMIN__TOKEN: bfa014e0-e02e-4aa6-a42b-603b19dcf159
+        APP__APP_LOG__EXTENDED_ERROR_MESSAGE: true
+        APP__HEALTH_ACCESS_KEY: cihealthkey
+        REDIS__HOSTNAME: redis
+        REDIS__NAMESPACE: raw-start
+        ELASTICSEARCH__URL: http://elastic:9200
+        ELASTICSEARCH__INDEX_PREFIX: raw-start
+        MINIO__ENDPOINT: minio
+        MINIO__BUCKET_NAME: raw-start-bucket
+        RABBITMQ__HOSTNAME: rabbitmq
+        RABBITMQ__QUEUE_PREFIX: raw-start
+        EXPIRATION_SCHEDULER__ENABLED: false
+        SUBSCRIPTION_SCHEDULER__ENABLED: false
+      with:
+        entrypoint: /bin/sh
+        args: -c 'set -x ;
+          sleep 10;
+          ls -lart;
+          apk add build-base git libffi-dev cargo;
+          cp -a $DRONE_WORKSPACE/platform-reference/* /tmp/raw-start-platform/;
+          cd "$DRONE_WORKSPACE/client-python";
+          pip install -r requirements.txt;
+          pip install -e .[dev,doc];
+          cd /tmp/raw-start-platform/opencti-graphql;
+          yarn install;
+          yarn install:python;
+          NODE_OPTIONS=--max_old_space_size=8192 yarn start;
 
 
     services:
@@ -64,28 +109,3 @@ jobs:
           MINIO_ROOT_PASSWORD: ChangeMe
       rabbitmq:
         image: rabbitmq:4.1-management
-
-      opencti-raw-start:
-        image: nikolaik/python-nodejs:python3.11-nodejs22-alpine
-        env:
-          APP__PORT: 4100
-          APP__ADMIN__PASSWORD: admin
-          APP__ENABLED_DEV_FEATURES: '["*"]'
-          APP__CHILD_LOCKING_PROCESS__ENABLED: true
-#          APP__ENTERPRISE_EDITION_LICENSE:
-#            from_secret: ee_license
-          APP__ADMIN__TOKEN: bfa014e0-e02e-4aa6-a42b-603b19dcf159
-          APP__APP_LOG__EXTENDED_ERROR_MESSAGE: true
-          APP__HEALTH_ACCESS_KEY: cihealthkey
-          REDIS__HOSTNAME: redis
-          REDIS__NAMESPACE: raw-start
-          ELASTICSEARCH__URL: http://elastic:9200
-          ELASTICSEARCH__INDEX_PREFIX: raw-start
-          MINIO__ENDPOINT: minio
-          MINIO__BUCKET_NAME: raw-start-bucket
-          RABBITMQ__HOSTNAME: rabbitmq
-          RABBITMQ__QUEUE_PREFIX: raw-start
-          EXPIRATION_SCHEDULER__ENABLED: false
-          SUBSCRIPTION_SCHEDULER__ENABLED: false
-        options: >-
-          --entrypoint /bin/sh -c "echo tset"
