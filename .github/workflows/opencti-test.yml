@@ -83,7 +83,7 @@ jobs:
           cd /tmp/raw-start-platform/opencti-graphql;
           yarn install;
           yarn install:python;
-          NODE_OPTIONS=--max_old_space_size=8192 yarn start;
+          NODE_OPTIONS=--max_old_space_size=8192 yarn start;'
 
 
     - name: Echo after opencti start
