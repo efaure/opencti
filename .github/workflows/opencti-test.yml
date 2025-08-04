@@ -17,9 +17,14 @@ jobs:
           echo "Runner OS: $RUNNER_OS \t Runner Arch: $RUNNER_ARCH"
           echo "Workflow: ${{ github.workflow }} \t Run ID: ${{ github.run_id }} \t Run Number: ${{ github.run_number }}"
           echo "Workspace: ${{ github.workspace }}"
-          echo " pwd $(pwd) ";
+          echo " pwd $(pwd) " 
+          echo "ls -l"
+          ls -l 
+          echo "ls github.workspace"
           ls ${{ github.workspace }} -l  2>/dev/null || true
+          echo " ls GITHUB_WORKSPACE"
           ls  ${GITHUB_WORKSPACE}" -l  2>/dev/null || true
+          echo "ls  /__w"
           ls /__w  -l 2>/dev/null || true
 
     - name: OpenCTI checkout
