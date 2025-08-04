@@ -42,6 +42,7 @@ jobs:
           ./scripts/clone-dependencies.sh "${GITHUB_HEAD_REF}" "${GITHUB_BASE_REF}" "$(pwd)" "${{ github.event.pull_request.number }}" ;
           ls -lart ;
           cd client-python ;
+          sleep 60 ;
           echo "[INFO] using client-python on branch $(git branch --show-current)" ;
           git log -n 1 ;'
 
@@ -76,6 +77,7 @@ jobs:
           sleep 10;
           ls -lart;
           apk add build-base git libffi-dev cargo;
+          mkdir -p /tmp/raw-start-platform/;
           cp -a platform-reference/* /tmp/raw-start-platform/;
           cd client-python;
           pip install -r requirements.txt;
