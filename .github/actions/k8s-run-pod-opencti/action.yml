@@ -1,0 +1,51 @@
+name: "Run Kubernetes Pod with Custom Command"
+description: "Starts a pod with a custom command and optionally exposes it"
+inputs:
+  name:
+    description: "Pod and service name"
+    required: true
+  image:
+    description: "Container image"
+    required: true
+  command:
+    description: "Custom command"
+    required: true
+  args:
+    description: "Arguments to the command (space-separated)"
+    required: false
+  port:
+    description: "Port to expose"
+    required: false
+  expose:
+    description: "Whether to expose via a Service"
+    default: "false"
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: |
+        set -e
+
+        # Clean any existing pod or service
+        kubectl delete pod ${{ inputs.name }} --ignore-not-found
+        if [ "${{ inputs.expose }}" = "true" ]; then
+          kubectl delete service ${{ inputs.name }} --ignore-not-found
+        fi
+
+        # Create pod with custom command
+        kubectl run ${{ inputs.name }} \
+          --image=${{ inputs.image }} \
+          --restart=Never \
+          --command -- ${{ inputs.command }} ${{ inputs.args }}
+
+        # Optional: expose as service
+        if [ "${{ inputs.expose }}" = "true" ] && [ -n "${{ inputs.port }}" ]; then
+          kubectl expose pod ${{ inputs.name }} \
+            --port=${{ inputs.port }} \
+            --target-port=${{ inputs.port }} \
+            --name=${{ inputs.name }}
+        fi
+
+        # Wait for pod to be ready
+        kubectl wait --for=condition=Ready pod/${{ inputs.name }} --timeout=60s
