@@ -25,13 +25,22 @@ jobs:
     - name: Set up kubectl
       uses: azure/setup-kubectl@v3
 
+    - name: Kubernetes command
+      run: | 
+        kubectl config view
+        echo $KUBECONFIG
+
     - uses: azure/k8s-set-context@v4
       with:
         method: kubeconfig
         kubeconfig: '${{ secrets.KUBE_CONFIG_GHA_RUNNER }}'
 
     - name: Kubernetes command
-      run: kubectl get pod
+      run: | 
+        kubectl config view
+        echo $KUBECONFIG
+        kubectl  --server=https://172.16.61.254:7443 --token=$KUBE_TOKEN get pod -n ghar-dev  
+        kubectl get pod -n ghar-dev
 
     - name: OpenCTI checkout
       uses: actions/checkout@v4
