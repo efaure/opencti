@@ -23,13 +23,13 @@ jobs:
     - name: OpenCTI checkout
       uses: actions/checkout@v4
 
-    - name: dependencies-checkout
-      uses: docker://nikolaik/python-nodejs:python3.11-nodejs22-alpine
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Run the build process with Docker
+      uses: addnab/docker-run-action@v3
       with:
-        entrypoint: /bin/sh
-        args: -c 'set -x ;
+        image: nikolaik/python-nodejs:python3.11-nodejs22-alpine
+        options: -v ${{ github.workspace }}:/var/www
+        run: |
+          set -x ;
           echo "Runner Name= $RUNNER_NAME"
           echo "$(date) dependencies-checkout" ; 
           echo "Workspace GITHUB_WORKSPACE =  ${GITHUB_WORKSPACE}" ;
@@ -42,7 +42,15 @@ jobs:
           ls -lart ;
           cd client-python ;
           echo "[INFO] using client-python on branch $(git branch --show-current)" ;
-          git log -n 1 ;'
+          git log -n 1 ;
+
+    - name: dependencies-checkout
+      uses: docker://nikolaik/python-nodejs:python3.11-nodejs22-alpine
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        entrypoint: /bin/sh
+        args: -c 'echo "This is a test"'
 
     - name: Check total memory usage
       run: |
