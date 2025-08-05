@@ -24,9 +24,9 @@ jobs:
 
     - name: Set up kubectl
       uses: azure/setup-kubectl@v3
-
-    - name: Kubernetes command
-      run: kubectl get pod
+#
+#    - name: Kubernetes command
+#      run: kubectl get pod
 
     - name: OpenCTI checkout
       uses: actions/checkout@v4
