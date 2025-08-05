@@ -6,7 +6,6 @@ on:
 
 jobs:
   OpenCTI-CI:
-    # You need to use the INSTALLATION_NAME from the previous step
     runs-on: arc-runner-set-dev
     container: ubuntu:latest
     steps:
@@ -25,22 +24,13 @@ jobs:
     - name: Set up kubectl
       uses: azure/setup-kubectl@v3
 
-    - name: Kubernetes command
-      run: | 
-        kubectl config view
-        echo $KUBECONFIG
-
     - uses: azure/k8s-set-context@v4
       with:
         method: kubeconfig
         kubeconfig: '${{ secrets.KUBE_CONFIG_GHA_RUNNER }}'
 
-    - name: Kubernetes command
-      run: | 
-        kubectl config view
-        echo $KUBECONFIG
-        kubectl  --server=https://172.16.61.254:7443 --token=$KUBE_TOKEN get pod -n ghar-dev  
-        kubectl get pod -n ghar-dev
+    - name: Kubernetes command test
+      run: kubectl get pod -n ghar-dev
 
     - name: OpenCTI checkout
       uses: actions/checkout@v4
@@ -52,6 +42,7 @@ jobs:
       with:
         entrypoint: /bin/sh
         args: -c 'set -x ;
+          echo "Runner Name= $RUNNER_NAME"
           echo "$(date) dependencies-checkout" ; 
           echo "Workspace GITHUB_WORKSPACE =  ${GITHUB_WORKSPACE}" ;
           ls  ${GITHUB_WORKSPACE} -larth  2>/dev/null || true ;
@@ -66,7 +57,57 @@ jobs:
           git log -n 1 ;'
 
 
+  second-job:
+    runs-on: arc-runner-set-dev
 
+    steps:
+    - name: OpenCTI second start
+      uses: docker://nikolaik/python-nodejs:python3.11-nodejs22-alpine
+      env:
+        APP__PORT: 4100
+        APP__ADMIN__PASSWORD: admin
+        APP__ENABLED_DEV_FEATURES: '["*"]'
+        APP__CHILD_LOCKING_PROCESS__ENABLED: true
+#          APP__ENTERPRISE_EDITION_LICENSE:
+#            from_secret: ee_license
+        APP__ADMIN__TOKEN: bfa014e0-e02e-4aa6-a42b-603b19dcf159
+        APP__APP_LOG__EXTENDED_ERROR_MESSAGE: true
+        APP__HEALTH_ACCESS_KEY: cihealthkey
+        REDIS__HOSTNAME: redis
+        REDIS__NAMESPACE: raw-start
+        ELASTICSEARCH__URL: http://elastic:9200
+        ELASTICSEARCH__INDEX_PREFIX: raw-start
+        MINIO__ENDPOINT: minio
+        MINIO__BUCKET_NAME: raw-start-bucket
+        RABBITMQ__HOSTNAME: rabbitmq
+        RABBITMQ__QUEUE_PREFIX: raw-start
+        EXPIRATION_SCHEDULER__ENABLED: false
+        SUBSCRIPTION_SCHEDULER__ENABLED: false
+      with:
+        entrypoint: /bin/sh
+        args: -c 'set -x ;
+          echo "Runner Name= $RUNNER_NAME"
+          echo "$(date) raw start" ; 
+          sleep 10;
+          ls -lart;
+          apk add build-base git libffi-dev cargo;
+          mkdir -p /tmp/raw-start-platform/;
+          cp -a platform-reference/* /tmp/raw-start-platform/;
+          cd client-python;
+          pip install -r requirements.txt;
+          pip install -e .[dev,doc];
+          cd /tmp/raw-start-platform/opencti-graphql;
+          yarn install;
+          yarn install:python;
+          NODE_OPTIONS=--max_old_space_size=8192 yarn start && true ;
+          sleep 300'
+
+
+    - name: Echo after opencti start
+      run: |
+          echo "after opencti start"
+        
+        
 
     - name: OpenCTI Raw start
       uses: docker://nikolaik/python-nodejs:python3.11-nodejs22-alpine
@@ -93,6 +134,7 @@ jobs:
       with:
         entrypoint: /bin/sh
         args: -c 'set -x ;
+          echo "Runner Name= $RUNNER_NAME"
           echo "$(date) raw start" ; 
           sleep 10;
           ls -lart;
@@ -107,12 +149,6 @@ jobs:
           yarn install:python;
           NODE_OPTIONS=--max_old_space_size=8192 yarn start && true ;
           sleep 300'
-
-
-    - name: Echo after opencti start
-      run: |
-          echo "after opencti start"
-        
 
     services:
       redis:
