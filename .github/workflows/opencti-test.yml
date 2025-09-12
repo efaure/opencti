@@ -1,4 +1,4 @@
-name: OpenCTI CI
+name: OpenCTI CI self hosted
 on:
   workflow_dispatch:
 #  push:
@@ -21,6 +21,9 @@ jobs:
           ls  ${GITHUB_WORKSPACE} -larth  2>/dev/null || true
           ls /__w  -larth 2>/dev/null || true
 
+    - name: Display Runner Information
+      run: |
+          docker run --rm --name temp-container busybox sleep 300
     - name: Set up kubectl
       uses: azure/setup-kubectl@v3
 
@@ -34,6 +37,8 @@ jobs:
 
     - name: OpenCTI checkout
       uses: actions/checkout@v4
+
+
 
     - name: dependencies-checkout
       uses: docker://nikolaik/python-nodejs:python3.11-nodejs22-alpine
