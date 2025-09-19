@@ -16,7 +16,7 @@ jobs:
           echo "Runner OS: $RUNNER_OS \t Runner Arch: $RUNNER_ARCH"
           echo "Workflow: ${{ github.workflow }} \t Run ID: ${{ github.run_id }} \t Run Number: ${{ github.run_number }}"
           echo "Workspace  GITHUB_WORKSPACE =  ${GITHUB_WORKSPACE} "
-          tree /home/runner
+          tree /home/runner/work
           echo " pwd $(pwd) " 
           ls -larth
           ls  ${GITHUB_WORKSPACE} -larth  2>/dev/null || true
@@ -72,7 +72,7 @@ jobs:
       run: |
         docker run -d \
           --name opencti-raw-start \
-          -v ${{ github.workspace }}:/home/workspace
+          -v ${{ github.workspace }}:/home/workspace \
           -e MY_ENV_VAR=value \
           -e APP__PORT: 4100 \
           -e APP__ADMIN__PASSWORD: admin \
