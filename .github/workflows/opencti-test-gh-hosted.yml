@@ -44,8 +44,8 @@ jobs:
           apk add git github-cli ; 
           chmod 777 scripts/* ;         
           git config --global --add safe.directory ${{ github.workspace }}
-          echo "Launching clonde-dependencies.sh ${{ github.ref }} ${{ github.head_ref }} $(pwd) ${{ github.event.pull_request.number }}" ; 
-          ./scripts/clone-dependencies.sh "${{ github.ref }}" "${{ github.head_ref }}" "$(pwd)" "${{ github.event.pull_request.number }}" ;
+          echo "Launching clonde-dependencies.sh ${{ github.base_ref }} ${{ github.head_ref }} $(pwd) ${{ github.event.pull_request.number }}" ; 
+          ./scripts/clone-dependencies.sh  "${{ github.base_ref }}" "${{ github.head_ref }}" "$(pwd)" "${{ github.event.pull_request.number }}" ;
           ls -lart ;
           cd client-python ;
           echo "[INFO] using client-python on branch $(git branch --show-current)" ;
@@ -97,8 +97,11 @@ jobs:
             sleep 10 && \
             ls -lart && \
             apk add build-base git libffi-dev cargo && \
+            pwd  && \
             mkdir -p /tmp/raw-start-platform/ && \
             cp -a /home/workspace/platform-reference/* /tmp/raw-start-platform/ && \
+            ls -lart && \
+            ls -lart /tmp/raw-start-platform/ && \
             cd client-python && \
             pip install -r requirements.txt && \
             pip install -e .[dev,doc] && \
