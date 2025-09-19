@@ -73,24 +73,23 @@ jobs:
         docker run -d \
           --name opencti-raw-start \
           -v ${{ github.workspace }}:/home/workspace \
-          -e MY_ENV_VAR=value \
-          -e APP__PORT: 4100 \
-          -e APP__ADMIN__PASSWORD: admin \
-          -e APP__ENABLED_DEV_FEATURES: '["*"]' \
-          -e APP__CHILD_LOCKING_PROCESS__ENABLED: false \
-          -e APP__ADMIN__TOKEN: bfa014e0-e02e-4aa6-a42b-603b19dcf159 \
-          -e APP__APP_LOG__EXTENDED_ERROR_MESSAGE: true \
-          -e APP__HEALTH_ACCESS_KEY: cihealthkey \
-          -e REDIS__HOSTNAME: redis \
-          -e REDIS__NAMESPACE: raw-start \
-          -e ELASTICSEARCH__URL: http://elastic:9200 \
-          -e ELASTICSEARCH__INDEX_PREFIX: raw-start \
-          -e MINIO__ENDPOINT: minio \
-          -e MINIO__BUCKET_NAME: raw-start-bucket \
-          -e RABBITMQ__HOSTNAME: rabbitmq \
-          -e RABBITMQ__QUEUE_PREFIX: raw-start \
-          -e EXPIRATION_SCHEDULER__ENABLED: false \
-          -e SUBSCRIPTION_SCHEDULER__ENABLED: false \
+          -e APP__PORT=4100 \
+          -e APP__ADMIN__PASSWORD=admin \
+          -e APP__ENABLED_DEV_FEATURES='["*"]' \
+          -e APP__CHILD_LOCKING_PROCESS__ENABLED=false \
+          -e APP__ADMIN__TOKEN=bfa014e0-e02e-4aa6-a42b-603b19dcf159 \
+          -e APP__APP_LOG__EXTENDED_ERROR_MESSAGE=true \
+          -e APP__HEALTH_ACCESS_KEY=cihealthkey \
+          -e REDIS__HOSTNAME=redis \
+          -e REDIS__NAMESPACE=raw-start \
+          -e ELASTICSEARCH__URL=http://elastic:9200 \
+          -e ELASTICSEARCH__INDEX_PREFIX=raw-start \
+          -e MINIO__ENDPOINT=minio \
+          -e MINIO__BUCKET_NAME=raw-start-bucket \
+          -e RABBITMQ__HOSTNAME=rabbitmq \
+          -e RABBITMQ__QUEUE_PREFIX=raw-start \
+          -e EXPIRATION_SCHEDULER__ENABLED=false \
+          -e SUBSCRIPTION_SCHEDULER__ENABLED=false \
           nikolaik/python-nodejs:python3.11-nodejs22-alpine \
           sh -c 'set -x && \
             echo "Runner Name= $RUNNER_NAME" && \
