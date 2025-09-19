@@ -61,12 +61,12 @@ jobs:
         args: -c 'echo "This is a test - ${MY_HELLO_VAR}"'
 
     - name: Check total memory usage
-      continue-on-error: true
       run: |
-        echo " pwd $(pwd) " 
-        ls -larth
-        ps aux | sort -nk +4 | tail -5
-        ree -m
+          sleep 60
+          docker ps
+          free -m
+          docker stats --no-stream        
+          ps aux | sort -nk +4 | tail -10
 
     - name: Start container raw-start
       run: |
@@ -152,6 +152,7 @@ jobs:
     - name: Check total memory usage
       run: |
           sleep 60
+          docker ps
           free -m
           docker stats --no-stream
         
