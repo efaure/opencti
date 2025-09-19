@@ -42,7 +42,7 @@ jobs:
           apk add git github-cli ; 
           chmod 777 scripts/* ;         
           echo "Launching clonde-dependencies.sh ${{ github.ref }} ${{ github.head_ref }} $(pwd) ${{ github.event.pull_request.number }}" ; 
-          ./scripts/clone-dependencies.sh "${GITHUB_HEAD_REF}" "${GITHUB_BASE_REF}" "$(pwd)" "${{ github.event.pull_request.number }}" ;
+          ./scripts/clone-dependencies.sh "${{ github.ref }}" "${{ github.head_ref }}" "$(pwd)" "${{ github.event.pull_request.number }}" ;
           ls -lart ;
           cd client-python ;
           echo "[INFO] using client-python on branch $(git branch --show-current)" ;
@@ -60,6 +60,8 @@ jobs:
     - name: Check total memory usage
       continue-on-error: true
       run: |
+        echo " pwd $(pwd) " 
+        ls -larth
         ps aux | sort -nk +4 | tail -5
         ree -m
 
@@ -67,6 +69,7 @@ jobs:
       run: |
         docker run -d \
           --name opencti-raw-start \
+          -v ${{ github.workspace }}:/home/workspace
           -e MY_ENV_VAR=value \
           -e APP__PORT: 4100 \
           -e APP__ADMIN__PASSWORD: admin \
@@ -93,7 +96,7 @@ jobs:
             ls -lart && \
             apk add build-base git libffi-dev cargo && \
             mkdir -p /tmp/raw-start-platform/ && \
-            cp -a platform-reference/* /tmp/raw-start-platform/ && \
+            cp -a /home/workspace/platform-reference/* /tmp/raw-start-platform/ && \
             cd client-python && \
             pip install -r requirements.txt && \
             pip install -e .[dev,doc] && \
