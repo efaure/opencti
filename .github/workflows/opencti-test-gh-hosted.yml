@@ -18,10 +18,10 @@ jobs:
           echo " pwd $(pwd) " 
           ls -larth
           ls  ${GITHUB_WORKSPACE} -larth  2>/dev/null || true
-          ls /__w  -larth 2>/dev/null || true
           ps aux | sort -nk +4 | tail -5
           env
           free -m
+          docker stats --no-stream
 
     - name: OpenCTI checkout
       uses: actions/checkout@v4
@@ -41,6 +41,7 @@ jobs:
           cp -R opencti-platform platform-reference ; 
           apk add git github-cli ; 
           chmod 777 scripts/* ;         
+          git config --global --add safe.directory ${{ github.workspace }}/opencti
           echo "Launching clonde-dependencies.sh ${{ github.ref }} ${{ github.head_ref }} $(pwd) ${{ github.event.pull_request.number }}" ; 
           ./scripts/clone-dependencies.sh "${{ github.ref }}" "${{ github.head_ref }}" "$(pwd)" "${{ github.event.pull_request.number }}" ;
           ls -lart ;
