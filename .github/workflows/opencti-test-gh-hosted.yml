@@ -44,8 +44,8 @@ jobs:
           apk add git github-cli ; 
           chmod 777 scripts/* ;         
           git config --global --add safe.directory ${{ github.workspace }}
-          echo "Launching clonde-dependencies.sh ${{ github.base_ref }} ${{ github.head_ref }} $(pwd) ${{ github.event.pull_request.number }}" ; 
-          ./scripts/clone-dependencies.sh  "${{ github.base_ref }}" "${{ github.head_ref }}" "$(pwd)" "${{ github.event.pull_request.number }}" ;
+          echo "Launching clonde-dependencies.sh  ${{ github.head_ref }} ${{ github.base_ref }} $(pwd) ${{ github.event.pull_request.number }}" ; 
+          ./scripts/clone-dependencies.sh  "${{ github.head_ref }}" ${{ github.base_ref }} "$(pwd)" "${{ github.event.pull_request.number }}" ;
           ls -lart ;
           cd client-python ;
           echo "[INFO] using client-python on branch $(git branch --show-current)" ;
