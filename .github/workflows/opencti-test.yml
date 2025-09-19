@@ -2,7 +2,7 @@ name: OpenCTI CI self hosted
 on:
   workflow_dispatch:
 #  push:
-  pull_request:
+#  pull_request:
 
 jobs:
   OpenCTI-CI:
