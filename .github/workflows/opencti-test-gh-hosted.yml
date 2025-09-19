@@ -16,7 +16,7 @@ jobs:
           echo "Runner OS: $RUNNER_OS \t Runner Arch: $RUNNER_ARCH"
           echo "Workflow: ${{ github.workflow }} \t Run ID: ${{ github.run_id }} \t Run Number: ${{ github.run_number }}"
           echo "Workspace  GITHUB_WORKSPACE =  ${GITHUB_WORKSPACE} "
-          tree /home/runner/work
+          tree  ${{ github.workspace }}/..
           echo " pwd $(pwd) " 
           ls -larth
           ls  ${GITHUB_WORKSPACE} -larth  2>/dev/null || true
@@ -68,7 +68,7 @@ jobs:
         ps aux | sort -nk +4 | tail -5
         ree -m
 
-    - name: Start container
+    - name: Start container raw-start
       run: |
         docker run -d \
           --name opencti-raw-start \
@@ -93,7 +93,7 @@ jobs:
           nikolaik/python-nodejs:python3.11-nodejs22-alpine \
           sh -c 'set -x && \
             echo "Runner Name= $RUNNER_NAME" && \
-            echo "$(date) raw start" 
+            echo "$(date) raw start"  && \
             sleep 10 && \
             ls -lart && \
             apk add build-base git libffi-dev cargo && \
@@ -108,51 +108,99 @@ jobs:
             NODE_OPTIONS=--max_old_space_size=6000 yarn start && true '
 
 
-    - name: OpenCTI Raw start
-      uses: docker://nikolaik/python-nodejs:python3.11-nodejs22-alpine
-      env:
-        APP__PORT: 4100
-        APP__ADMIN__PASSWORD: admin
-        APP__ENABLED_DEV_FEATURES: '["*"]'
-        APP__CHILD_LOCKING_PROCESS__ENABLED: false
-#          APP__ENTERPRISE_EDITION_LICENSE:
-#            from_secret: ee_license
-        APP__ADMIN__TOKEN: bfa014e0-e02e-4aa6-a42b-603b19dcf159
-        APP__APP_LOG__EXTENDED_ERROR_MESSAGE: true
-        APP__HEALTH_ACCESS_KEY: cihealthkey
-        REDIS__HOSTNAME: redis
-        REDIS__NAMESPACE: raw-start
-        ELASTICSEARCH__URL: http://elastic:9200
-        ELASTICSEARCH__INDEX_PREFIX: raw-start
-        MINIO__ENDPOINT: minio
-        MINIO__BUCKET_NAME: raw-start-bucket
-        RABBITMQ__HOSTNAME: rabbitmq
-        RABBITMQ__QUEUE_PREFIX: raw-start
-        EXPIRATION_SCHEDULER__ENABLED: false
-        SUBSCRIPTION_SCHEDULER__ENABLED: false
-      with:
-        entrypoint: /bin/sh
-        args: -c 'set -x ;
-          echo "Runner Name= $RUNNER_NAME"
-          echo "$(date) raw start" ; 
-          sleep 10;
-          ls -lart;
-          apk add build-base git libffi-dev cargo;
-          mkdir -p /tmp/raw-start-platform/;
-          cp -a platform-reference/* /tmp/raw-start-platform/;
-          cd client-python;
-          pip install -r requirements.txt;
-          pip install -e .[dev,doc];
-          cd /tmp/raw-start-platform/opencti-graphql;
-          yarn install;
-          yarn install:python;
-          NODE_OPTIONS=--max_old_space_size=6000 yarn start && true ;
-          sleep 300'
+#    - name: OpenCTI Raw start
+#      uses: docker://nikolaik/python-nodejs:python3.11-nodejs22-alpine
+#      env:
+#        APP__PORT: 4100
+#        APP__ADMIN__PASSWORD: admin
+#        APP__ENABLED_DEV_FEATURES: '["*"]'
+#        APP__CHILD_LOCKING_PROCESS__ENABLED: false
+##          APP__ENTERPRISE_EDITION_LICENSE:
+##            from_secret: ee_license
+#        APP__ADMIN__TOKEN: bfa014e0-e02e-4aa6-a42b-603b19dcf159
+#        APP__APP_LOG__EXTENDED_ERROR_MESSAGE: true
+#        APP__HEALTH_ACCESS_KEY: cihealthkey
+#        REDIS__HOSTNAME: redis
+#        REDIS__NAMESPACE: raw-start
+#        ELASTICSEARCH__URL: http://elastic:9200
+#        ELASTICSEARCH__INDEX_PREFIX: raw-start
+#        MINIO__ENDPOINT: minio
+#        MINIO__BUCKET_NAME: raw-start-bucket
+#        RABBITMQ__HOSTNAME: rabbitmq
+#        RABBITMQ__QUEUE_PREFIX: raw-start
+#        EXPIRATION_SCHEDULER__ENABLED: false
+#        SUBSCRIPTION_SCHEDULER__ENABLED: false
+#      with:
+#        entrypoint: /bin/sh
+#        args: -c 'set -x ;
+#          echo "Runner Name= $RUNNER_NAME";
+#          echo "$(date) raw start" ;
+#          sleep 10;
+#          ls -lart;
+#          apk add build-base git libffi-dev cargo;
+#          mkdir -p /tmp/raw-start-platform/;
+#          cp -a platform-reference/* /tmp/raw-start-platform/;
+#          cd client-python;
+#          pip install -r requirements.txt;
+#          pip install -e .[dev,doc];
+#          cd /tmp/raw-start-platform/opencti-graphql;
+#          yarn install;
+#          yarn install:python;
+#          NODE_OPTIONS=--max_old_space_size=6000 yarn start && true ;
+#          sleep 300'
 
     - name: Check total memory usage
       run: |
-        ps aux | sort -nk +4 | tail -5
-        ree -m
+          sleep 60
+          free -m
+          docker stats --no-stream
+        
+
+    - name: Start container live-start
+      run: |
+        docker run -d \
+          --name opencti-live-start \
+          -v ${{ github.workspace }}:/home/workspace \
+          -e APP__PORT=4100 \
+          -e APP__ADMIN__PASSWORD=admin \
+          -e APP__ENABLED_DEV_FEATURES='["*"]' \
+          -e APP__CHILD_LOCKING_PROCESS__ENABLED=false \
+          -e APP__ADMIN__TOKEN=bfa014e0-e02e-4aa6-a42b-603b19dcf159 \
+          -e APP__APP_LOG__EXTENDED_ERROR_MESSAGE=true \
+          -e APP__HEALTH_ACCESS_KEY=cihealthkey \
+          -e REDIS__HOSTNAME=redis \
+          -e REDIS__NAMESPACE=live-start \
+          -e ELASTICSEARCH__URL=http://elastic:9200 \
+          -e ELASTICSEARCH__INDEX_PREFIX=live-start \
+          -e MINIO__ENDPOINT=minio \
+          -e MINIO__BUCKET_NAME=live-start-bucket \
+          -e RABBITMQ__HOSTNAME=rabbitmq \
+          -e RABBITMQ__QUEUE_PREFIX=live-start \
+          -e EXPIRATION_SCHEDULER__ENABLED=false \
+          -e SUBSCRIPTION_SCHEDULER__ENABLED=false \
+          nikolaik/python-nodejs:python3.11-nodejs22-alpine \
+          sh -c 'set -x && \
+            echo "Runner Name= $RUNNER_NAME" && \
+            echo "$(date) live start"  && \
+            sleep 10 && \
+            ls -lart && \
+            apk add build-base git libffi-dev cargo && \
+            mkdir -p /tmp/live-start-platform/ && \
+            cp -a /home/workspace/platform-reference/* /tmp/live-start-platform/ && \
+            cd client-python && \
+            pip install -r requirements.txt && \
+            pip install -e .[dev,doc] && \
+            cd /tmp/live-start-platform/opencti-graphql && \
+            yarn install && \
+            yarn install:python && \
+            NODE_OPTIONS=--max_old_space_size=6000 yarn start && true '
+        
+
+    - name: Check total memory usage
+      run: |
+          sleep 60
+          free -m
+          docker stats --no-stream
         
 
     services:
