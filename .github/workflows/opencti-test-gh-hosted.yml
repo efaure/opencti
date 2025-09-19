@@ -26,10 +26,6 @@ jobs:
     - name: OpenCTI checkout
       uses: actions/checkout@v4
 
-    - name: Display Runner Information
-      run: |
-          set -x
-
     - name: Run the dependency checkout  process with addnab  Dockeraction
       uses: addnab/docker-run-action@v3
       with:
@@ -39,8 +35,9 @@ jobs:
           set -x ;
           echo "Runner Name= $RUNNER_NAME"
           echo "$(date) dependencies-checkout" ; 
-          echo "Workspace GITHUB_WORKSPACE =  ${GITHUB_WORKSPACE}" ;
+          echo "Workspace  github.workspace  = ${{ github.workspace }}" ;
           ls  ${{ github.workspace }} -larth  2>/dev/null || true ;
+          cd ${{ github.workspace }};
           cp -R opencti-platform platform-reference ; 
           apk add git github-cli ; 
           chmod 777 scripts/* ;         
@@ -51,15 +48,17 @@ jobs:
           echo "[INFO] using client-python on branch $(git branch --show-current)" ;
           git log -n 1 ;
 
-    - name: dependencies-checkout
+    - name: Test step with docker://
+      continue-on-error: true
       uses: docker://nikolaik/python-nodejs:python3.11-nodejs22-alpine
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        MY_HELLO_VAR: "Hello"
       with:
         entrypoint: /bin/sh
-        args: -c 'echo "This is a test"'
+        args: -c 'echo "This is a test - ${MY_HELLO_VAR}"'
 
     - name: Check total memory usage
+      continue-on-error: true
       run: |
         ps aux | sort -nk +4 | tail -5
         ree -m
@@ -179,14 +178,14 @@ jobs:
       rabbitmq:
         image: rabbitmq:4.1-management
 
-  Job-OpenCTI-second:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Display Runner Information
-      run: |
-          set -x
-          echo "Runner Name: $RUNNER_NAME"
-          echo "Runner OS: $RUNNER_OS \t Runner Arch: $RUNNER_ARCH"
-          echo "Workflow: ${{ github.workflow }} \t Run ID: ${{ github.run_id }} \t Run Number: ${{ github.run_number }}"
-          echo "Workspace  GITHUB_WORKSPACE =  ${GITHUB_WORKSPACE} "
-          echo " pwd $(pwd) "
+#  Job-OpenCTI-second:
+#    runs-on: ubuntu-latest
+#    steps:
+#    - name: Display Runner Information
+#      run: |
+#          set -x
+#          echo "Runner Name: $RUNNER_NAME"
+#          echo "Runner OS: $RUNNER_OS \t Runner Arch: $RUNNER_ARCH"
+#          echo "Workflow: ${{ github.workflow }} \t Run ID: ${{ github.run_id }} \t Run Number: ${{ github.run_number }}"
+#          echo "Workspace  GITHUB_WORKSPACE =  ${GITHUB_WORKSPACE} "
+#          echo " pwd $(pwd) "
