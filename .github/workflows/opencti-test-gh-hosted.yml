@@ -30,7 +30,7 @@ jobs:
       uses: addnab/docker-run-action@v3
       with:
         image: nikolaik/python-nodejs:python3.11-nodejs22-alpine
-        options: -v ${{ github.workspace }}:${{ github.workspace }}
+        options: -v ${{ github.workspace }}:${{ github.workspace }} -e GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
         run: |
           set -x ;
           echo "Runner Name= $RUNNER_NAME"
