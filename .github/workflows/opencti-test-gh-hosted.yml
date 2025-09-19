@@ -26,17 +26,21 @@ jobs:
     - name: OpenCTI checkout
       uses: actions/checkout@v4
 
+    - name: Display Runner Information
+      run: |
+          set -x
+
     - name: Run the dependency checkout  process with addnab  Dockeraction
       uses: addnab/docker-run-action@v3
       with:
         image: nikolaik/python-nodejs:python3.11-nodejs22-alpine
-        options: -v ${{ github.workspace }}:/var/www
+        options: -v ${{ github.workspace }}:${{ github.workspace }}
         run: |
           set -x ;
           echo "Runner Name= $RUNNER_NAME"
           echo "$(date) dependencies-checkout" ; 
           echo "Workspace GITHUB_WORKSPACE =  ${GITHUB_WORKSPACE}" ;
-          ls  ${GITHUB_WORKSPACE} -larth  2>/dev/null || true ;
+          ls  ${{ github.workspace }} -larth  2>/dev/null || true ;
           cp -R opencti-platform platform-reference ; 
           apk add git github-cli ; 
           chmod 777 scripts/* ;         
