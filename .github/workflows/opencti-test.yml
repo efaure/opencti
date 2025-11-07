@@ -7,7 +7,7 @@ on:
 jobs:
   OpenCTI-CI:
     runs-on: arc-runner-set-dev
-    container: ubuntu:latest
+#    container: ubuntu:latest
     steps:
     - name: Display Runner Information
       continue-on-error: true
