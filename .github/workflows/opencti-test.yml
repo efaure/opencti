@@ -10,176 +10,59 @@ jobs:
     container: ubuntu:latest
     steps:
     - name: Display Runner Information
+      continue-on-error: true
       run: |
-          set -x
-          echo "Runner Name: $RUNNER_NAME"
-          echo "Runner OS: $RUNNER_OS \t Runner Arch: $RUNNER_ARCH"
+          set -ex
+          echo "Runner Name: $RUNNER_NAME \n Runner OS: $RUNNER_OS \n Runner Arch: $RUNNER_ARCH"
           echo "Workflow: ${{ github.workflow }} \t Run ID: ${{ github.run_id }} \t Run Number: ${{ github.run_number }}"
-          echo "Workspace  GITHUB_WORKSPACE =  ${GITHUB_WORKSPACE} "
-          echo " pwd $(pwd) " 
-          ls -larth
-          ls  ${GITHUB_WORKSPACE} -larth  2>/dev/null || true
-          ls /__w  -larth 2>/dev/null || true
-
-    - name: Display Runner Information
-      run: |
-          docker run --rm --name temp-container busybox sleep 300
-    - name: Set up kubectl
-      uses: azure/setup-kubectl@v3
-
-    - uses: azure/k8s-set-context@v4
-      with:
-        method: kubeconfig
-        kubeconfig: '${{ secrets.KUBE_CONFIG_GHA_RUNNER }}'
-
-#    - name: Kubernetes command test
-#      run: kubectl get pod -n ghar-dev
+          echo "Workspace  GITHUB_WORKSPACE =  ${GITHUB_WORKSPACE}  \t   github.workspace= ${{ github.workspace }} \t  pwd $(pwd) "
+          env
 
     - name: OpenCTI checkout
       uses: actions/checkout@v4
 
 
+    - name: Collect Workflow Telemetry
+      uses: catchpoint/workflow-telemetry-action@v2
 
-    - name: dependencies-checkout
-      uses: docker://nikolaik/python-nodejs:python3.11-nodejs22-alpine
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        entrypoint: /bin/sh
-        args: -c 'set -x ;
-          echo "Runner Name= $RUNNER_NAME"
-          echo "$(date) dependencies-checkout" ; 
-          echo "Workspace GITHUB_WORKSPACE =  ${GITHUB_WORKSPACE}" ;
-          ls  ${GITHUB_WORKSPACE} -larth  2>/dev/null || true ;
-          cp -R opencti-platform platform-reference ; 
-          apk add git github-cli ; 
-          chmod 777 scripts/* ;         
-          echo "Launching clonde-dependencies.sh ${{ github.ref }} ${{ github.head_ref }} $(pwd) ${{ github.event.pull_request.number }}" ; 
-          ./scripts/clone-dependencies.sh "${GITHUB_HEAD_REF}" "${GITHUB_BASE_REF}" "$(pwd)" "${{ github.event.pull_request.number }}" ;
-          ls -lart ;
-          cd client-python ;
-          echo "[INFO] using client-python on branch $(git branch --show-current)" ;
-          git log -n 1 ;'
-
-
-  second-job:
-    runs-on: arc-runner-set-dev
-    container: ubuntu:latest
-
-    steps:
-    - name: OpenCTI second start
-      uses: docker://nikolaik/python-nodejs:python3.11-nodejs22-alpine
-      env:
-        APP__PORT: 4100
-        APP__ADMIN__PASSWORD: admin
-        APP__ENABLED_DEV_FEATURES: '["*"]'
-        APP__CHILD_LOCKING_PROCESS__ENABLED: true
-#          APP__ENTERPRISE_EDITION_LICENSE:
-#            from_secret: ee_license
-        APP__ADMIN__TOKEN: bfa014e0-e02e-4aa6-a42b-603b19dcf159
-        APP__APP_LOG__EXTENDED_ERROR_MESSAGE: true
-        APP__HEALTH_ACCESS_KEY: cihealthkey
-        REDIS__HOSTNAME: redis
-        REDIS__NAMESPACE: raw-start
-        ELASTICSEARCH__URL: http://elastic:9200
-        ELASTICSEARCH__INDEX_PREFIX: raw-start
-        MINIO__ENDPOINT: minio
-        MINIO__BUCKET_NAME: raw-start-bucket
-        RABBITMQ__HOSTNAME: rabbitmq
-        RABBITMQ__QUEUE_PREFIX: raw-start
-        EXPIRATION_SCHEDULER__ENABLED: false
-        SUBSCRIPTION_SCHEDULER__ENABLED: false
-      with:
-        entrypoint: /bin/sh
-        args: -c 'set -x ;
-          echo "Runner Name= $RUNNER_NAME"
-          echo "$(date) raw start" ; 
-          sleep 10;
-          ls -lart;
-          apk add build-base git libffi-dev cargo;
-          mkdir -p /tmp/raw-start-platform/;
-          cp -a platform-reference/* /tmp/raw-start-platform/;
-          cd client-python;
-          pip install -r requirements.txt;
-          pip install -e .[dev,doc];
-          cd /tmp/raw-start-platform/opencti-graphql;
-          yarn install;
-          yarn install:python;
-          NODE_OPTIONS=--max_old_space_size=8192 yarn start && true ;
-          sleep 300'
-
-
-    - name: Echo after opencti start
+    - name: Start api test
       run: |
-          echo "after opencti start"
-        
-        
+        docker run --network runner-docker-network \
+          --name api-tests \
+          -p 4010:4100 \
+          -v ${{ github.workspace }}:/home/workspace \
+          -e APP__BASE_URL=http://api-tests:4010/ \
+          -e APP__ADMIN__PASSWORD=admin \
+          -e APP__CHILD_LOCKING_PROCESS__ENABLED=false \
+          -e APP__ENTERPRISE_EDITION_LICENSE="${{ secrets.EE_LICENSE }}" \
+          -e APP__SYNC_RAW_START_REMOTE_URI=http://opencti-raw-start:4100/graphql \
+          -e APP__SYNC_LIVE_START_REMOTE_URI=http://opencti-live-start:4100/graphql \
+          -e APP__SYNC_DIRECT_START_REMOTE_URI=http://opencti-direct-start:4100/graphql \
+          -e APP__SYNC_RESTORE_START_REMOTE_URI=http://opencti-restore-start:4100/graphql \
+          -e APP__ADMIN__TOKEN=bfa014e0-e02e-4aa6-a42b-603b19dcf159 \
+          -e REDIS__HOSTNAME=redis \
+          -e ELASTICSEARCH__URL=http://elasticsearch:9200 \
+          -e MINIO__ENDPOINT=minio \
+          -e RABBITMQ__HOSTNAME=rabbitmq \
+          -e EXPIRATION_SCHEDULER__ENABLED=false \
+          -e SUBSCRIPTION_SCHEDULER__ENABLED=false \
+          -e SMTP__ENABLED=false \
+          -e PYTHONUNBUFFERED=1  \
+          nikolaik/python-nodejs:python3.11-nodejs22-alpine \
+          sh -c 'set -ex;
+            echo -e "\n\n *********\n ********* Start OpenCTI API test";
+            echo "$(ls /root/.yarn/berry/cache/ 2> /dev/null | wc -l || echo 0) packages in Yarn global cache";
+            apk add build-base git libffi-dev cargo;
+            cd /home/workspace
+            git clone https://github.com/OpenCTI-Platform/connectors.git opencti-connectors
+            git clone https://github.com/OpenCTI-Platform/client-python.git
+            cd /home/workspace/opencti-platform/opencti-graphql
+            npm install -g corepack
+            cp /home/workspace/opencti-platform/.yarnrc.yml .
+            yarn install
+            yarn build
+            yarn check-ts
+            yarn lint
+            NODE_OPTIONS=--max_old_space_size=8192 yarn test:ci-integration
+        '
 
-    - name: OpenCTI Raw start
-      uses: docker://nikolaik/python-nodejs:python3.11-nodejs22-alpine
-      env:
-        APP__PORT: 4100
-        APP__ADMIN__PASSWORD: admin
-        APP__ENABLED_DEV_FEATURES: '["*"]'
-        APP__CHILD_LOCKING_PROCESS__ENABLED: true
-#          APP__ENTERPRISE_EDITION_LICENSE:
-#            from_secret: ee_license
-        APP__ADMIN__TOKEN: bfa014e0-e02e-4aa6-a42b-603b19dcf159
-        APP__APP_LOG__EXTENDED_ERROR_MESSAGE: true
-        APP__HEALTH_ACCESS_KEY: cihealthkey
-        REDIS__HOSTNAME: redis
-        REDIS__NAMESPACE: raw-start
-        ELASTICSEARCH__URL: http://elastic:9200
-        ELASTICSEARCH__INDEX_PREFIX: raw-start
-        MINIO__ENDPOINT: minio
-        MINIO__BUCKET_NAME: raw-start-bucket
-        RABBITMQ__HOSTNAME: rabbitmq
-        RABBITMQ__QUEUE_PREFIX: raw-start
-        EXPIRATION_SCHEDULER__ENABLED: false
-        SUBSCRIPTION_SCHEDULER__ENABLED: false
-      with:
-        entrypoint: /bin/sh
-        args: -c 'set -x ;
-          echo "Runner Name= $RUNNER_NAME"
-          echo "$(date) raw start" ; 
-          sleep 10;
-          ls -lart;
-          apk add build-base git libffi-dev cargo;
-          mkdir -p /tmp/raw-start-platform/;
-          cp -a platform-reference/* /tmp/raw-start-platform/;
-          cd client-python;
-          pip install -r requirements.txt;
-          pip install -e .[dev,doc];
-          cd /tmp/raw-start-platform/opencti-graphql;
-          yarn install;
-          yarn install:python;
-          NODE_OPTIONS=--max_old_space_size=8192 yarn start && true ;
-          sleep 300'
-
-    services:
-      redis:
-        image: redis:8.0.0
-        ports:
-          - 6379:6379
-        # Set health checks to wait until redis has started
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      elastic:
-        image: docker.elastic.co/elasticsearch/elasticsearch:8.18.2
-        ports:
-          - 9200:9200
-        options: --health-cmd="curl http://localhost:9200/_cluster/health"
-        env:
-          discovery.type: single-node
-          xpack.security.enabled: false
-          ES_JAVA_OPTS: -Xms2g -Xmx2g
-      minio:
-        image: minio/minio:RELEASE.2023-07-07T07-13-57Z
-        env:
-          MINIO_ROOT_USER: ChangeMe
-          MINIO_ROOT_PASSWORD: ChangeMe
-      rabbitmq:
-        image: rabbitmq:4.1-management
