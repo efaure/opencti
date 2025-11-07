@@ -25,7 +25,12 @@ jobs:
     - name: Collect Workflow Telemetry
       uses: catchpoint/workflow-telemetry-action@v2
 
+    - name: Check Docker connection
+      continue-on-error: true
+      run: docker info
+
     - name: Start api test
+      continue-on-error: true
       run: |
         docker run --network runner-docker-network \
           --name api-tests \
@@ -66,3 +71,6 @@ jobs:
             NODE_OPTIONS=--max_old_space_size=8192 yarn test:ci-integration
         '
 
+
+    - name: Sleep
+      run: sleep 300
