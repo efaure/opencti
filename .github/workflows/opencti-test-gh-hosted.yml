@@ -9,7 +9,7 @@ jobs:
   call-build-workflow:
       uses: ./.github/workflows/opencti-docker-build.yml
       with:
-        image_tag: ${{ github.sha }}
+        image_tag: fork-${{ github.sha }}
       secrets: inherit
 
   run-opencti-integration-test:
@@ -42,7 +42,7 @@ jobs:
       run: |
          set -ex
          cd opencti-platform/opencti-ci         
-         export TAG=${{ github.sha }}
+         export TAG=fork-${{ github.sha }}
          docker network create runner-docker-network
          docker compose --profile "*" up -d
 
