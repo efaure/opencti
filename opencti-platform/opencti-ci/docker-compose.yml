@@ -18,9 +18,6 @@ services:
       - "ES_JAVA_OPTS=-Xms2G -Xmx2G"
     restart: unless-stopped
     ulimits:
-      memlock:
-        soft: -1
-        hard: -1
       nofile:
         soft: 65536
         hard: 65536

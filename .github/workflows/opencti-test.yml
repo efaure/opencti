@@ -45,8 +45,6 @@ jobs:
          set -ex
          cd opencti-platform/opencti-ci
          export TAG=fork-${{ github.sha }}
-         docker info
-         docker pull filigran/worker:fork-8753afd464fe94e0a1b6c0f66140377bf0a7d68c
          docker network create runner-docker-network
          docker compose --profile "*" up -d
 
