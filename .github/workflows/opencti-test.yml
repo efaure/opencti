@@ -101,17 +101,21 @@ jobs:
           sh -c 'set -ex;
             echo -e "\n\n *********\n ********* Start OpenCTI API test";
             echo "$(ls /root/.yarn/berry/cache/ 2> /dev/null | wc -l || echo 0) packages in Yarn global cache";            
-            node -v || yarn -v || yarn cache clean
+            node -v 
+            yarn -v
+            yarn cache clean
             apk add build-base git libffi-dev cargo;
-            apk add --no-cache bash make g++ gcc libc-dev python3-dev linux-headers \
-            && ln -sf /usr/bin/python3 /usr/bin/python
+            apk add --no-cache bash make g++ gcc libc-dev python3-dev linux-headers 
+            ln -sf /usr/bin/python3 /usr/bin/python
             cd /home/workspace
             git clone https://github.com/OpenCTI-Platform/connectors.git opencti-connectors
             git clone https://github.com/OpenCTI-Platform/client-python.git
             cd /home/workspace/opencti-platform/opencti-graphql
             npm install -g corepack
             cp /home/workspace/opencti-platform/.yarnrc.yml .
-            yarn install
+            yarn install || true
+            cat /tmp/*/build.log || true
+            sleep 300
             yarn build
             yarn check-ts
             yarn lint
