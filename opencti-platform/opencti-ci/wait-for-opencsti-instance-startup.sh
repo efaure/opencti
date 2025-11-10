@@ -1,6 +1,6 @@
 #!/bin/bash
 # Usage: ./wait-for-200.sh <URL> <TIMEOUT_SECONDS> <CHECK_INTERVAL_SECONDS>
-set -eux
+set -x
 
 URL="$1"
 TIMEOUT="$2"
