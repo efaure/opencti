@@ -33,6 +33,9 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+    - name: Set up Docker Compose
+      uses: docker/setup-compose-action@v1
+
     - name: Collect Workflow Telemetry
       uses: catchpoint/workflow-telemetry-action@v2
 
@@ -41,8 +44,6 @@ jobs:
          set -ex
          cd opencti-platform/opencti-ci         
          export TAG=fork-${{ github.sha }}         
-         sudo apt-get update
-         sudo apt-get install -y docker-compose-plugin
          docker network create runner-docker-network
          docker compose --profile "*" up -d
 
