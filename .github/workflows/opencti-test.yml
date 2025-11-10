@@ -117,6 +117,7 @@ jobs:
 
     # Output all logs used during the job
     - name: Log backends (Minio, Elastic, RabbitMQ, Redis)
+      if: always()
       continue-on-error: true
       run: |
           echo -e "\n\n *********\n ********* logs Minio \n"; 
