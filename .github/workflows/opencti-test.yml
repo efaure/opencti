@@ -40,8 +40,9 @@ jobs:
       run: |
          set -ex
          cd opencti-platform/opencti-ci         
-         export TAG=fork-${{ github.sha }}
-         apt-get install -y docker-compose-plugin
+         export TAG=fork-${{ github.sha }}         
+         sudo apt-get update
+         sudo apt-get install -y docker-compose-plugin
          docker network create runner-docker-network
          docker compose --profile "*" up -d
 
