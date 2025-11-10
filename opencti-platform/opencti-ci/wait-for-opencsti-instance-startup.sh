@@ -1,5 +1,6 @@
 #!/bin/bash
 # Usage: ./wait-for-200.sh <URL> <TIMEOUT_SECONDS> <CHECK_INTERVAL_SECONDS>
+set -eux
 
 URL="$1"
 TIMEOUT="$2"
@@ -21,9 +22,19 @@ while :; do
   fi
 
   # Capture wget output quietly
-  output=$(wget --tries=1  --retry-connrefused=0 --server-response --spider -O /dev/null "$URL" 2>&1 >/dev/null)
+  # output=$(wget --tries=1  --retry-connrefused=0 --server-response --spider -O /dev/null "$URL" 2>&1 >/dev/null)
+  # code=$(printf "%s" "$output" | awk '/^  HTTP/{print $2; exit}')
+  code=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+  exit_code=$?
+
+  if [ $exit_code -ne 0 ]; then
+    echo "Error: wget failed with exit code $exit_code"
+    echo "Details:"
+    echo "$output"
+    exit $exit_code
+  fi
+
   # Extract HTTP code if present
-  code=$(printf "%s" "$output" | awk '/^  HTTP/{print $2; exit}')
 
   if [ -n "$code" ]; then
     echo "[$elapsed s] HTTP $code"
