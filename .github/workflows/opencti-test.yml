@@ -13,6 +13,7 @@ jobs:
 
   run-opencti-integration-test:
     runs-on: arc-runner-set-dev
+    needs: call-build-workflow
 
     steps:
     - name: Display Runner Information
