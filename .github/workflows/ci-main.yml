@@ -27,7 +27,7 @@ jobs:
     - name: OpenCTI checkout
       uses: actions/checkout@v6
       with:
-        ref: ${{ github.sha }}
+        ref: ${{ github.head_ref }}
       
     - name: Check trigger type
       run: |
