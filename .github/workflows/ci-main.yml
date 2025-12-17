@@ -13,6 +13,9 @@ jobs:
 
     steps:
 
+    - name: OpenCTI checkout
+      uses: actions/checkout@v6
+      
     - name: Check trigger type
       run: |
         echo "Event name: ${{ github.event_name }}"        
@@ -21,6 +24,14 @@ jobs:
         elif [ "${{ github.event_name }}" == "pull_request_target" ]; then
           echo "Triggered by pull_request_target"
         fi
+
+    - name: Get files
+      run: |
+        echo "Print content of opencti-platform/file-in-platform"        
+        cat .github/workflows/file_in_workflow
+        echo "Print content of opencti-platform/file-in-platform"        
+        cat opencti-platform/file-in-platform
+        
 
 #jobs:
 #  wf-build-image:
