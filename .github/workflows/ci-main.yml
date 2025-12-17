@@ -17,6 +17,11 @@ jobs:
       continue-on-error: true
       run: |
         echo -e "github.sha ${{ github.sha }}"
+        echo -e "github.base_ref ${{ github.base_ref }}"
+        echo -e "github.head_ref ${{ github.head_ref }}"
+        echo -e "github.ref ${{ github.ref }}"
+        echo -e "github.workflow_ref ${{ github.workflow_ref }}"
+        echo -e "github.workflow_sha ${{ github.workflow_sha }}"
         env
 
     - name: OpenCTI checkout
@@ -35,9 +40,9 @@ jobs:
 
     - name: Get files
       run: |
-        echo "Print content of opencti-platform/file-in-platform"        
+        echo -e "Print content of opencti-platform/file-in-platform"        
         cat .github/workflows/file_in_workflow
-        echo "Print content of opencti-platform/file-in-platform"        
+        echo -e "Print content of opencti-platform/file-in-platform"        
         cat opencti-platform/file-in-platform
         
 
