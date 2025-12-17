@@ -13,8 +13,16 @@ jobs:
 
     steps:
 
+    - name: Runner information
+      continue-on-error: true
+      run: |
+        echo -e "github.sha ${{ github.sha }}"
+        env
+
     - name: OpenCTI checkout
       uses: actions/checkout@v6
+      with:
+        ref: ${{ github.sha }}
       
     - name: Check trigger type
       run: |
