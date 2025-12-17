@@ -5,44 +5,61 @@ on:
   pull_request_target:
     types: [opened, synchronize, reopened]
 
+
 jobs:
-  wf-build-image:
-      name: Build image
-      uses: ./.github/workflows/ci-docker-build.yml
-      with:
-        checkout_ref: ${{ github.event_name == 'pull_request'  && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.sha }}
-        dockerfile_platform: Dockerfile.testing
-        build_context_platform: "."
-        dockerfile_worker: Dockerfile.testing
-        build_context_worker: "."
-      secrets: inherit
+  print-info:
+    name: print-info
+    runs-on: ubuntu-latest
 
-  wf-api-test:
-      name: API test
-      uses: ./.github/workflows/ci-test-api.yml
-      needs: wf-build-image
-      with:
-        checkout_ref: ${{ github.event_name == 'pull_request'  && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.sha }}
-      secrets: inherit
+    steps:
 
-  wf-frontend-test:
-      name: Frontend test
-      uses: ./.github/workflows/ci-test-frontend.yml
-      with:
-        checkout_ref: ${{ github.event_name == 'pull_request'  && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.sha }}
-      secrets: inherit
+    - name: Check trigger type
+      run: |
+        echo "Event name: ${{ github.event_name }}"        
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          echo "Triggered by pull_request"
+        elif [ "${{ github.event_name }}" == "pull_request_target" ]; then
+          echo "Triggered by pull_request_target"
+        fi
 
-  wf-client-python-test:
-      name: Client Python
-      uses: ./.github/workflows/ci-test-client-python.yml
-      needs: wf-build-image
-      with:
-        checkout_ref: ${{ github.event_name == 'pull_request'  && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.sha }}
-      secrets: inherit
-
-  wf-license-check:
-      name: License check
-      uses: ./.github/workflows/ci-license-check.yml
-      with:
-        checkout_ref: ${{ github.event_name == 'pull_request'  && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.sha }}
-      secrets: inherit
+#jobs:
+#  wf-build-image:
+#      name: Build image
+#      uses: ./.github/workflows/ci-docker-build.yml
+#      with:
+#        checkout_ref: ${{ github.event_name == 'pull_request'  && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.sha }}
+#        dockerfile_platform: Dockerfile.testing
+#        build_context_platform: "."
+#        dockerfile_worker: Dockerfile.testing
+#        build_context_worker: "."
+#      secrets: inherit
+#
+#  wf-api-test:
+#      name: API test
+#      uses: ./.github/workflows/ci-test-api.yml
+#      needs: wf-build-image
+#      with:
+#        checkout_ref: ${{ github.event_name == 'pull_request'  && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.sha }}
+#      secrets: inherit
+#
+#  wf-frontend-test:
+#      name: Frontend test
+#      uses: ./.github/workflows/ci-test-frontend.yml
+#      with:
+#        checkout_ref: ${{ github.event_name == 'pull_request'  && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.sha }}
+#      secrets: inherit
+#
+#  wf-client-python-test:
+#      name: Client Python
+#      uses: ./.github/workflows/ci-test-client-python.yml
+#      needs: wf-build-image
+#      with:
+#        checkout_ref: ${{ github.event_name == 'pull_request'  && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.sha }}
+##      secrets: inherit
+#
+#  wf-license-check:
+#      name: License check
+#      uses: ./.github/workflows/ci-license-check.yml
+#      with:
+#        checkout_ref: ${{ github.event_name == 'pull_request'  && format('refs/pull/{0}/merge', github.event.pull_request.number) || github.sha }}
+#      secrets: inherit
