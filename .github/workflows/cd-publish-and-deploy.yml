@@ -4,7 +4,7 @@ on:
   workflow_call:
   push:
   workflow_run:
-    workflows: ["OpenCTI CI"]
+    workflows: ["License check"]
     types: [requested]
     ## TODO Switch branches when ready to activate
     # branches: [master,release/current]
