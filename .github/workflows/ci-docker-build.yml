@@ -11,6 +11,11 @@ on:
         description: "Reference of the branch or commit sha"
         type: string
         default: ${{ github.sha }}
+      client_python_local:
+        description: "Use client python from the same commit"
+        type: boolean
+        required: false
+        default: false
       dockerfile_target:
         description: "Target to build in the multi stage docker file - testing or app"
         type: string
@@ -29,6 +34,11 @@ on:
       is_publish_to_registry:
         description: "Publish image to registry. If false, will save the image as github artifact"
         type: boolean
+        required: false
+        default: false
+      publish_to_registry:
+        description: "Publish image to registry. If false, will save the image as github artifact"
+        type: string
         required: false
         default: false
       registry:

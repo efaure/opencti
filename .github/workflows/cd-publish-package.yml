@@ -1,0 +1,38 @@
+name: Publish package
+
+on:
+  workflow_call:
+    inputs:
+      is_client_python_local:
+        description: "Use client python from the same commit"
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  generate_package_name:
+    runs-on: ubuntu-latest
+    outputs:
+      package_name: ${{ steps.package_name.outputs.value }}
+    steps:
+      - name: Generate package name
+        id: package_name
+        run: echo "value=opencti-$(date +%Y%m%d)" >> $GITHUB_OUTPUT
+
+  build_package_debian:
+    name: Build package debian
+    runs-on: ubuntu-latest
+    needs: generate_package_name
+    steps:
+      - name: Simulate build
+        continue-on-error: true
+        run: echo "Simulate build"
+
+  build_package_musl:
+    name: Build package musl
+    runs-on: ubuntu-latest
+    needs: generate_package_name
+    steps:
+      - name: Simulate build
+        continue-on-error: true
+        run: echo "Simulate build"
