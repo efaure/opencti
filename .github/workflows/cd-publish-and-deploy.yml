@@ -3,10 +3,9 @@ name: Publish and deploy to staging
 on:
   workflow_call:
   workflow_run:
-    workflows: ["Check signed commits in PR"]
-    types: [requested]
-    ## TODO Switch branches when ready to activate
-    # branches: [master,release/current]
+    workflows: ["OpenCTI CI"]
+    types: [completed]
+    branches: [master,release/current]
 
 jobs:
   debug:
